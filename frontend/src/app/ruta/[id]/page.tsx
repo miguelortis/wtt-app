@@ -154,19 +154,34 @@ export default function RouteDetail() {
             </span>
             <Tag color="blue">Asignado</Tag>
           </div>
-          <div className="text-xs text-slate-500 flex flex-col gap-1 mt-2">
-            <span>
-              <strong>Inicio:</strong>{" "}
-              {dayjs(duty?.startTime).format("DD MMM YYYY, HH:mm")}
-            </span>
-            <span>
-              <strong>Fin:</strong>{" "}
-              {dayjs(duty?.endTime).format("DD MMM YYYY, HH:mm")}
-            </span>
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-xs text-slate-500 flex flex-col gap-1 mt-2">
+              <span>
+                <strong>Inicio:</strong>{" "}
+                {dayjs(duty?.startTime).format("DD MMM YYYY, HH:mm")}
+              </span>
+              <span>
+                <strong>Fin:</strong>{" "}
+                {dayjs(duty?.endTime).format("DD MMM YYYY, HH:mm")}
+              </span>
+            </div>
+            <div>
+              <Popconfirm
+                key="delete"
+                title="¿Liberar esta unidad?"
+                description="Se eliminará este duty del historial."
+                onConfirm={() => deleteDuty.mutate(duty._id)}
+                okText="Sí, eliminar"
+                cancelText="Cancelar"
+                okButtonProps={{ danger: true }}
+              >
+                <Button type="text" danger icon={<DeleteOutlined />} />
+              </Popconfirm>
+            </div>
           </div>
         </div>
       ),
-    })
+    }),
   );
   return (
     <main className="max-w-7xl mx-auto p-4 md:p-8">
