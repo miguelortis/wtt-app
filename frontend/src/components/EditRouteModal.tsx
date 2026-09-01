@@ -76,7 +76,7 @@ export default function EditRouteModal({ isOpen, onClose, routeId, initialName, 
       onOk={() => form.submit()}
       confirmLoading={updateRoute.isPending}
       width={800}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         <Form.Item 

@@ -64,7 +64,7 @@ export default function CreateRouteModal({ isOpen, onClose }: CreateRouteModalPr
       onOk={() => form.submit()}
       confirmLoading={createRoute.isPending}
       width={800}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={{ points: [] }}>
         <Form.Item 
