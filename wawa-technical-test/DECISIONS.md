@@ -14,3 +14,8 @@ Para la base de datos, he estructurado los esquemas en MongoDB habilitando `vers
 **La decisión:** En lugar de realizar una verificación lineal (leer, validar, insertar) —la cual es vulnerable a *race conditions*—, encapsulé la validación matemática de los tiempos (`$lt` y `$gt`) y la creación del documento dentro de una misma `Session` de Mongoose ejecutando `startTransaction()`. 
 
 **Impacto:** Esto asegura que la operación sea atómica. Si dos hilos validan la disponibilidad al mismo tiempo, el motor de la base de datos bloqueará o abortará la segunda transacción, protegiendo la regla de negocio.
+
+## 4. Modelado de Rutas y Puntos Geográficos
+Para las rutas, estructuré los datos utilizando un subdocumento incrustado (`GeoPointSchema`) dentro de un array en el documento principal de `Route`. 
+
+**Por qué:** El requerimiento pide que la ruta sea una "lista ordenada"[cite: 1]. Los arrays en MongoDB preservan el orden de inserción de forma nativa. Al incrustar los puntos en lugar de referenciarlos, evitamos consultas costosas tipo `$lookup` (JOINs) al leer la ruta, optimizando el tiempo de respuesta para la vista de detalle en el mapa.
