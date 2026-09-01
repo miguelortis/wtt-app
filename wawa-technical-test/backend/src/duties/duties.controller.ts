@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
 import { DutiesService } from './duties.service.js';
 
 @Controller('duties')
@@ -18,5 +18,10 @@ export class DutiesController {
   @Get('route/:routeId')
   async getByRoute(@Param('routeId') routeId: string) {
     return this.dutiesService.getDutiesByRoute(routeId);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.dutiesService.remove(id);
   }
 }

@@ -67,7 +67,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Modal de Creación Modular */}
       <CreateRouteModal 
         isOpen={isCreateModalOpen} 
         onClose={() => setIsCreateModalOpen(false)} 

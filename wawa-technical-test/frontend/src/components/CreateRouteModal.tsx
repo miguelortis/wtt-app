@@ -54,7 +54,7 @@ export default function CreateRouteModal({ isOpen, onClose }: CreateRouteModalPr
       onOk={() => form.submit()}
       confirmLoading={createRoute.isPending}
       width={800}
-      destroyOnClose
+      destroyOnHidden
     >
       <Form 
         form={form} 
@@ -104,7 +104,7 @@ export default function CreateRouteModal({ isOpen, onClose }: CreateRouteModalPr
           </div>
         )}
 
-        <label className="block font-semibold mb-2 text-slate-700 flex items-center gap-2">
+        <label className="font-semibold mb-2 text-slate-700 flex items-center gap-2">
           <EnvironmentOutlined className="text-blue-600" /> Puntos Geográficos Registrados ({pointsValue.length})
         </label>
         

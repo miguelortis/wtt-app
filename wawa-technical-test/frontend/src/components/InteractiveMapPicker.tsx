@@ -32,7 +32,7 @@ function ClickHandler({ onAddPoint }: MapEventsProps) {
 }
 
 export default function InteractiveMapPicker({ points, onAddPoint }: { points: Point[]; onAddPoint: (lat: number, lng: number) => void }) {
-  // Centro por defecto (Coro, Venezuela) o el primer punto si existe
+  
   const defaultCenter: [number, number] = points.length > 0 && Number(points[0].lat) 
     ? [Number(points[0].lat), Number(points[0].lng)] 
     : [11.404, -69.673];
