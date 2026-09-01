@@ -5,9 +5,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Form, Input, DatePicker, Button, notification, Spin, List, Tag } from 'antd';
-import { ArrowLeftOutlined, CarOutlined, ClockCircleOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, CarOutlined, ClockCircleOutlined, EnvironmentOutlined, EditOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import EditRouteModal from '@/components/EditRouteModal';
+import { ApiError, CreateDutyValues, Duty } from '@/types';
 
 const DynamicMap = dynamic(() => import('@/components/Map'), { 
   ssr: false,
@@ -21,7 +24,9 @@ export default function RouteDetail() {
   const routeId = params.id as string;
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
-
+  
+  // Estado para controlar el modal de edición
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { data: route, isLoading: routeLoading } = useQuery({
     queryKey: ['route', routeId],
@@ -34,7 +39,7 @@ export default function RouteDetail() {
   });
 
   const createDuty = useMutation({
-    mutationFn: async (values: any) => {
+    mutationFn: async (values: CreateDutyValues) => {
       const payload = {
         routeId,
         unitId: values.unitId,
@@ -48,11 +53,11 @@ export default function RouteDetail() {
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ['duties', routeId] });
     },
-    onError: (error: any) => {
+    onError: (error: ApiError) => {
       if (error.response?.status === 409) {
         notification.error({ 
           title: 'Error de Solapamiento', 
-          description: error.response.data.message || 'La unidad ya tiene una asignación en ese horario.',
+          description: error?.response?.data?.message || 'La unidad ya tiene una asignación en ese horario.',
           placement: 'topRight'
         });
       } else {
@@ -70,7 +75,14 @@ export default function RouteDetail() {
         <Link href="/" className="text-slate-500 hover:text-blue-600 transition flex items-center gap-2 mb-4 w-fit">
           <ArrowLeftOutlined /> Volver al panel
         </Link>
-        <h1 className="text-3xl font-bold text-slate-800">{route.name}</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-bold text-slate-800">{route.name}</h1>
+          <Button 
+            type="text" 
+            icon={<EditOutlined className="text-slate-500 hover:text-blue-600 text-xl" />} 
+            onClick={() => setIsEditModalOpen(true)} 
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -84,6 +96,7 @@ export default function RouteDetail() {
             </div>
           </div>
         </div>
+        
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
             <h2 className="text-xl font-bold text-slate-800 mb-2">Asignar Unidad (Duty)</h2>
@@ -127,7 +140,7 @@ export default function RouteDetail() {
               loading={dutiesLoading}
               dataSource={duties}
               locale={{ emptyText: 'No hay unidades asignadas aún.' }}
-              renderItem={(duty: any) => (
+              renderItem={(duty: Duty) => (
                 <List.Item className="border-b border-slate-100 last:border-0 pb-3 mb-3">
                   <div className="w-full">
                     <div className="flex justify-between items-center mb-1">
@@ -143,9 +156,15 @@ export default function RouteDetail() {
               )}
             />
           </div>
-
         </div>
       </div>
+
+      <EditRouteModal 
+        isOpen={isEditModalOpen} 
+        onClose={() => setIsEditModalOpen(false)} 
+        routeId={routeId}
+        initialName={route.name}
+      />
     </main>
   );
 }

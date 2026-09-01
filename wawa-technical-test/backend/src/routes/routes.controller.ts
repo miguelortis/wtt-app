@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { RoutesService } from './routes.service.js';
 
 @Controller('routes')
@@ -18,5 +18,10 @@ export class RoutesController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.routesService.findOne(id);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateData: any) {
+    return this.routesService.update(id, updateData);
   }
 }

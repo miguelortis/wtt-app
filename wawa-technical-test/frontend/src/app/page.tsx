@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import Link from 'next/link';
 import { Button, Spin, Empty } from 'antd';
 import { PlusOutlined, EnvironmentOutlined, ArrowRightOutlined } from '@ant-design/icons';
+import { Route } from '@/types';
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -58,7 +59,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {routes.map((route: any) => (
+          {routes.map((route: Route) => (
             <div key={route._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-200 transition-all group">
               <div className="flex items-start justify-between mb-4">
                 <div className="bg-blue-50 p-3 rounded-xl text-blue-600">

@@ -21,4 +21,10 @@ export class RoutesService {
     if (!route) throw new NotFoundException('Ruta no encontrada');
     return route;
   }
+
+  async update(id: string, updateData: any) {
+    const updatedRoute = await this.routeModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
+    if (!updatedRoute) throw new NotFoundException('Ruta no encontrada');
+    return updatedRoute;
+  }
 }
