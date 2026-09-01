@@ -25,3 +25,9 @@ Para cumplir con la visualización de rutas geográficas, elegí **Leaflet (reac
 
 **El reto:** Leaflet hace referencia al objeto global `window` inmediatamente, lo cual causa crashes durante el Server-Side Rendering (SSR) de Next.js.
 **La solución:** En las vistas de detalle que implementaremos, el componente `<Map />` será importado dinámicamente utilizando `next/dynamic` con la opción `{ ssr: false }`. Esto garantiza que la hidratación del mapa ocurra estrictamente en el cliente (Browser), evitando errores de build y manteniendo la velocidad inicial de carga de la página.
+
+## 6. Conducción de IA y Criterio de Selección
+Durante el desarrollo, utilicé IA como herramienta de *scaffolding* y generación rápida de código, pero tomé el control directivo en las decisiones críticas:
+
+* **Corrección en el manejo de concurrencia (El Core):** Inicialmente, la IA sugirió resolver el solapamiento de ventanas horarias haciendo un simple `findOne()` seguido de un `.save()`. Rechacé esta propuesta porque creaba una ventana vulnerable a *race conditions*. Forcé a la IA a reescribir el endpoint implementando `startSession()` y encapsulando la lógica en una **Transacción ACID**, priorizando la integridad sobre la simplicidad.
+* **Refinamiento de la UI:** La IA propuso en un principio formularios y alertas nativas de HTML/CSS. Decidí descartar ese enfoque e instruí la integración de **Ant Design combinado con Tailwind CSS**. Esto me permitió manejar los errores HTTP 409 (Conflict) del backend con notificaciones asíncronas precisas, dándole al MVP un estándar visual de SaaS logístico.
