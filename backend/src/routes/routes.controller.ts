@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
 import { RoutesService } from './routes.service.js';
 import { CreateRouteDto, UpdateRouteDto } from './dto/route.dto.js';
+import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
 @Controller('routes')
 export class RoutesController {
@@ -24,5 +25,14 @@ export class RoutesController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateData: UpdateRouteDto) {
     return this.routesService.update(id, updateData);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar una ruta completa' })
+  @ApiParam({ name: 'id', description: 'ID único de la ruta' })
+  @ApiResponse({ status: 200, description: 'Ruta eliminada correctamente.' })
+  @ApiResponse({ status: 404, description: 'Ruta no encontrada.' })
+  remove(@Param('id') id: string) {
+    return this.routesService.remove(id);
   }
 }

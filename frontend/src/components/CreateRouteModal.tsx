@@ -1,6 +1,6 @@
 'use client';
 
-import { Modal, Form, Input, notification, Space, Button } from 'antd';
+import { Modal, Form, Input, notification, Button, Space } from 'antd';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { GeoPoint } from '@/types';
@@ -8,10 +8,9 @@ import { MinusCircleOutlined, PlusOutlined, EnvironmentOutlined } from '@ant-des
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 
-// Importación dinámica del mapa interactivo para evitar problemas de SSR con Leaflet
 const InteractiveMapPicker = dynamic(() => import('@/components/InteractiveMapPicker'), {
   ssr: false,
-  loading: () => <div className="h-64 bg-slate-100 flex items-center justify-center rounded-lg text-slate-400">Cargando mapa interactivo...</div>
+  loading: () => <div className="h-64 bg-slate-100 flex items-center justify-center rounded-lg text-slate-400">Cargando mapa...</div>
 });
 
 interface CreateRouteModalProps {
@@ -34,40 +33,46 @@ export default function CreateRouteModal({ isOpen, onClose }: CreateRouteModalPr
       return await api.post('/routes', { name: values.name, points: formattedPoints });
     },
     onSuccess: () => {
-      notification.success({ title: 'Ruta creada', description: 'La nueva ruta se ha registrado exitosamente.' });
+      notification.success({ title: 'Ruta creada', description: 'La ruta y sus puntos se guardaron correctamente.' });
       queryClient.invalidateQueries({ queryKey: ['routes'] });
       form.resetFields();
       onClose();
     },
     onError: () => {
-      notification.error({ title: 'Error', description: 'No se pudo crear la ruta. Verifica los datos.' });
+      notification.error({ title: 'Error', description: 'No se pudo crear la ruta.' });
     }
   });
+
+  const handleFinish = (values: { name: string; points: GeoPoint[] }) => {
+    if (!values.points || values.points.length < 2) {
+      notification.warning({
+        title: 'Puntos insuficientes',
+        description: 'Debes registrar al menos 2 puntos geográficos para configurar una ruta válida.',
+      });
+      return;
+    }
+    createRoute.mutate(values);
+  };
 
   const pointsValue = Form.useWatch('points', form) || [];
 
   return (
     <Modal 
-      title="Crear Nueva Ruta con Selector de Mapa" 
+      title="Crear Nueva Ruta" 
       open={isOpen} 
       onCancel={onClose}
       onOk={() => form.submit()}
       confirmLoading={createRoute.isPending}
       width={800}
-      destroyOnHidden
+      destroyOnClose
     >
-      <Form 
-        form={form} 
-        layout="vertical" 
-        onFinish={(values) => createRoute.mutate(values)}
-        initialValues={{ points: [] }}
-      >
+      <Form form={form} layout="vertical" onFinish={handleFinish} initialValues={{ points: [] }}>
         <Form.Item 
           name="name" 
           label="Nombre de la ruta" 
           rules={[{ required: true, message: 'El nombre es obligatorio' }]}
         >
-          <Input size="large" placeholder="Ej: Ruta Norte - Sur" />
+          <Input size="large" placeholder="Ej: Ruta Centro - Norte" />
         </Form.Item>
 
         <div className="flex gap-2 mb-4">
@@ -88,7 +93,7 @@ export default function CreateRouteModal({ isOpen, onClose }: CreateRouteModalPr
         {activeTab === 'map' && (
           <div className="mb-6">
             <p className="text-xs text-slate-500 mb-2">
-              Haz clic sobre el mapa para ir agregando los puntos de la ruta en orden correlativo.
+              Haz clic sobre el mapa para añadir los puntos del trayecto. Se requieren al menos 2.
             </p>
             <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
               <InteractiveMapPicker 
@@ -104,13 +109,13 @@ export default function CreateRouteModal({ isOpen, onClose }: CreateRouteModalPr
           </div>
         )}
 
-        <label className="font-semibold mb-2 text-slate-700 flex items-center gap-2">
+        <label className="block font-semibold mb-2 text-slate-700 flex items-center gap-2">
           <EnvironmentOutlined className="text-blue-600" /> Puntos Geográficos Registrados ({pointsValue.length})
         </label>
         
         <Form.List name="points">
           {(fields, { add, remove }) => (
-            <div className="space-y-3 max-h-62.5 overflow-y-auto pr-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
               {fields.length === 0 && (
                 <p className="text-center text-slate-400 py-4 text-sm">
                   Aún no hay puntos. Haz clic en el mapa o añade coordenadas manualmente.

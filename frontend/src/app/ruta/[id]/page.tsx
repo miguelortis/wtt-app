@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import dynamic from "next/dynamic";
@@ -42,6 +42,7 @@ const { RangePicker } = DatePicker;
 
 export default function RouteDetail() {
   const params = useParams();
+  const router = useRouter();
   const routeId = params.id as string;
   const queryClient = useQueryClient();
   const [form] = Form.useForm();
@@ -56,6 +57,24 @@ export default function RouteDetail() {
   const { data: duties, isLoading: dutiesLoading } = useQuery({
     queryKey: ["duties", routeId],
     queryFn: async () => (await api.get(`/duties/route/${routeId}`)).data,
+  });
+
+  const deleteRoute = useMutation({
+    mutationFn: async () => await api.delete(`/routes/${routeId}`),
+    onSuccess: () => {
+      notification.success({
+        title: "Ruta eliminada",
+        description: "La ruta y su historial de duties han sido eliminados.",
+      });
+      queryClient.invalidateQueries({ queryKey: ["routes"] });
+      router.push("/");
+    },
+    onError: () => {
+      notification.error({
+        title: "Error",
+        description: "No se pudo eliminar la ruta.",
+      });
+    },
   });
 
   const createDuty = useMutation({
@@ -124,22 +143,47 @@ export default function RouteDetail() {
 
   return (
     <main className="max-w-7xl mx-auto p-4 md:p-8">
-      <div className="mb-8">
-        <Link
-          href="/"
-          className="text-slate-500 hover:text-blue-600 transition flex items-center gap-2 mb-4 w-fit"
-        >
-          <ArrowLeftOutlined /> Volver al panel
-        </Link>
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-slate-800">{route.name}</h1>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <Link
+            href="/"
+            className="text-slate-500 hover:text-blue-600 transition flex items-center gap-2 mb-4 w-fit"
+          >
+            <ArrowLeftOutlined /> Volver al panel
+          </Link>
+          <div className="flex items-center gap-4">
+            <h1 className="text-3xl font-bold text-slate-800">{route.name}</h1>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
           <Button
-            type="text"
-            icon={
-              <EditOutlined className="text-slate-500 hover:text-blue-600 text-xl" />
-            }
+            type="default"
+            icon={<EditOutlined />}
+            size="large"
             onClick={() => setIsEditModalOpen(true)}
-          />
+          >
+            Editar Ruta
+          </Button>
+
+          <Popconfirm
+            title="¿Eliminar toda la ruta?"
+            description="Se borrará la ruta y todo el historial de duties asociado."
+            onConfirm={() => deleteRoute.mutate()}
+            okText="Sí, eliminar"
+            cancelText="Cancelar"
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              danger
+              type="primary"
+              icon={<DeleteOutlined />}
+              size="large"
+              loading={deleteRoute.isPending}
+            >
+              Eliminar Ruta
+            </Button>
+          </Popconfirm>
         </div>
       </div>
 

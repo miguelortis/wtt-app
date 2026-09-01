@@ -55,6 +55,17 @@ export default function EditRouteModal({ isOpen, onClose, routeId, initialName, 
     }
   });
 
+  const handleFinish = (values: { name: string; points: GeoPoint[] }) => {
+    if (!values.points || values.points.length < 2) {
+      notification.warning({
+        title: 'Puntos insuficientes',
+        description: 'La ruta debe contener al menos 2 puntos geográficos.',
+      });
+      return;
+    }
+    updateRoute.mutate(values);
+  };
+
   const pointsValue = Form.useWatch('points', form) || [];
 
   return (
@@ -65,9 +76,9 @@ export default function EditRouteModal({ isOpen, onClose, routeId, initialName, 
       onOk={() => form.submit()}
       confirmLoading={updateRoute.isPending}
       width={800}
-      destroyOnHidden
+      destroyOnClose
     >
-      <Form form={form} layout="vertical" onFinish={(values) => updateRoute.mutate(values)}>
+      <Form form={form} layout="vertical" onFinish={handleFinish}>
         <Form.Item 
           name="name" 
           label="Nombre de la ruta" 
@@ -94,7 +105,7 @@ export default function EditRouteModal({ isOpen, onClose, routeId, initialName, 
         {activeTab === 'map' && (
           <div className="mb-6">
             <p className="text-xs text-slate-500 mb-2">
-              Haz clic sobre el mapa para añadir nuevos puntos o visualizar los existentes.
+              Haz clic sobre el mapa para añadir nuevos puntos o visualizar los existentes (mínimo 2).
             </p>
             <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
               <InteractiveMapPicker 
@@ -110,13 +121,13 @@ export default function EditRouteModal({ isOpen, onClose, routeId, initialName, 
           </div>
         )}
 
-        <label className="font-semibold mb-2 text-slate-700 flex items-center gap-2">
+        <label className="block font-semibold mb-2 text-slate-700 flex items-center gap-2">
           <EnvironmentOutlined className="text-blue-600" /> Puntos Geográficos Registrados ({pointsValue.length})
         </label>
         
         <Form.List name="points">
           {(fields, { add, remove }) => (
-            <div className="space-y-3 max-h-62.5 overflow-y-auto pr-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
               {fields.length === 0 && (
                 <p className="text-center text-slate-400 py-4 text-sm">
                   Aún no hay puntos. Haz clic en el mapa o añade coordenadas manualmente.
