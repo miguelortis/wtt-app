@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { RoutesService } from './routes.service.js';
-import { CreateRouteDto } from './dto/route.dto.js';
+import { CreateRouteDto, UpdateRouteDto } from './dto/route.dto.js';
 
 @Controller('routes')
 export class RoutesController {
@@ -22,7 +22,7 @@ export class RoutesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateData: any) {
+  update(@Param('id') id: string, @Body() updateData: UpdateRouteDto) {
     return this.routesService.update(id, updateData);
   }
 }

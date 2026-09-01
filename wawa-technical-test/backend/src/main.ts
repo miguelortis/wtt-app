@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module.js';
+import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
@@ -7,7 +8,8 @@ async function bootstrap() {
   
   app.enableCors();
   
-  // Configuración de Swagger / OpenAPI
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+  
   const config = new DocumentBuilder()
     .setTitle('WAWA Transport API')
     .setDescription('API oficial para la planificación de rutas y duties con control de concurrencia')
