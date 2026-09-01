@@ -1,12 +1,13 @@
 import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { RoutesService } from './routes.service.js';
+import { CreateRouteDto } from './dto/route.dto.js';
 
 @Controller('routes')
 export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
 
   @Post()
-  create(@Body() createRouteDto: any) {
+  create(@Body() createRouteDto: CreateRouteDto) {
     return this.routesService.create(createRouteDto);
   }
 

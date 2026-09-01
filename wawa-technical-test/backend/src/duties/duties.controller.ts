@@ -1,17 +1,18 @@
 import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
 import { DutiesService } from './duties.service.js';
+import { CreateDutyDto } from './dto/create-duty.dto.js';
 
 @Controller('duties')
 export class DutiesController {
   constructor(private readonly dutiesService: DutiesService) {}
 
   @Post()
-  async create(@Body() body: { routeId: string; unitId: string; startTime: string; endTime: string }) {
+  async create(@Body() createDutyDto: CreateDutyDto) {
     return this.dutiesService.createDuty(
-      body.routeId,
-      body.unitId,
-      new Date(body.startTime),
-      new Date(body.endTime)
+      createDutyDto.routeId,
+      createDutyDto.unitId,
+      new Date(createDutyDto.startTime),
+      new Date(createDutyDto.endTime)
     );
   }
 
