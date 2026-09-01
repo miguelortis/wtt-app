@@ -19,3 +19,9 @@ Para la base de datos, he estructurado los esquemas en MongoDB habilitando `vers
 Para las rutas, estructuré los datos utilizando un subdocumento incrustado (`GeoPointSchema`) dentro de un array en el documento principal de `Route`. 
 
 **Por qué:** El requerimiento pide que la ruta sea una "lista ordenada"[cite: 1]. Los arrays en MongoDB preservan el orden de inserción de forma nativa. Al incrustar los puntos en lugar de referenciarlos, evitamos consultas costosas tipo `$lookup` (JOINs) al leer la ruta, optimizando el tiempo de respuesta para la vista de detalle en el mapa.
+
+## 5. Integración de Mapas en Next.js (App Router)
+Para cumplir con la visualización de rutas geográficas, elegí **Leaflet (react-leaflet)** por ser ligero y de código abierto.
+
+**El reto:** Leaflet hace referencia al objeto global `window` inmediatamente, lo cual causa crashes durante el Server-Side Rendering (SSR) de Next.js.
+**La solución:** En las vistas de detalle que implementaremos, el componente `<Map />` será importado dinámicamente utilizando `next/dynamic` con la opción `{ ssr: false }`. Esto garantiza que la hidratación del mapa ocurra estrictamente en el cliente (Browser), evitando errores de build y manteniendo la velocidad inicial de carga de la página.
