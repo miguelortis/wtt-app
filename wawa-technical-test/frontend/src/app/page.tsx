@@ -1,14 +1,16 @@
 'use client';
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import Link from 'next/link';
+import { useState } from 'react';
 import { Button, Spin, Empty } from 'antd';
 import { PlusOutlined, EnvironmentOutlined, ArrowRightOutlined } from '@ant-design/icons';
 import { Route } from '@/types';
+import CreateRouteModal from '@/components/CreateRouteModal';
 
 export default function Home() {
-  const queryClient = useQueryClient();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const { data: routes, isLoading } = useQuery({
     queryKey: ['routes'],
@@ -16,20 +18,6 @@ export default function Home() {
       const res = await api.get('/routes');
       return res.data;
     },
-  });
-
-  const createMockRoute = useMutation({
-    mutationFn: async () => {
-      return api.post('/routes', {
-        name: 'Ruta Centro - Norte',
-        points: [
-          { lat: 11.404, lng: -69.673, name: 'Punto A (Inicio)' },
-          { lat: 11.410, lng: -69.670, name: 'Punto B' },
-          { lat: 11.415, lng: -69.665, name: 'Punto C (Destino)' }
-        ]
-      });
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['routes'] })
   });
 
   if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Spin size="large" /></div>;
@@ -46,10 +34,9 @@ export default function Home() {
           icon={<PlusOutlined />} 
           size="large"
           className="bg-blue-600 hover:bg-blue-700"
-          onClick={() => createMockRoute.mutate()}
-          loading={createMockRoute.isPending}
+          onClick={() => setIsCreateModalOpen(true)}
         >
-          Crear Ruta de Prueba
+          Crear Nueva Ruta
         </Button>
       </div>
 
@@ -79,6 +66,12 @@ export default function Home() {
           ))}
         </div>
       )}
+
+      {/* Modal de Creación Modular */}
+      <CreateRouteModal 
+        isOpen={isCreateModalOpen} 
+        onClose={() => setIsCreateModalOpen(false)} 
+      />
     </main>
   );
 }

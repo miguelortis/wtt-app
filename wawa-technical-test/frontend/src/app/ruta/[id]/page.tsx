@@ -164,6 +164,7 @@ export default function RouteDetail() {
         onClose={() => setIsEditModalOpen(false)} 
         routeId={routeId}
         initialName={route.name}
+        initialPoints={route.points}
       />
     </main>
   );
