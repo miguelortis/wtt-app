@@ -19,14 +19,30 @@ interface Point {
 }
 
 export default function Map({ points }: { points: Point[] }) {
-  if (!points || points.length === 0) return <div className="h-96 bg-gray-100 flex items-center justify-center">No hay puntos en la ruta</div>;
+  if (!points || points.length === 0) {
+    return (
+      <div className="h-100 bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200">
+        <span className="text-slate-400">No hay puntos geográficos registrados</span>
+      </div>
+    );
+  }
 
   const center = [points[0].lat, points[0].lng] as [number, number];
   const positions = points.map(p => [p.lat, p.lng] as [number, number]);
 
   return (
-    <MapContainer center={center} zoom={13} style={{ height: '400px', width: '100%', borderRadius: '0.5rem' }}>
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+    // El 'key' sigue siendo importante para forzar la re-renderización de Leaflet si la ruta cambia, 
+    // previniendo el error interno de appendChild de la librería.
+    <MapContainer 
+      key={center.toString()} 
+      center={center} 
+      zoom={14} 
+      style={{ height: '400px', width: '100%', borderRadius: '0.75rem', zIndex: 1 }}
+    >
+      <TileLayer 
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
+        attribution='&copy; OpenStreetMap contributors'
+      />
       
       {points.map((point, idx) => (
         <Marker key={idx} position={[point.lat, point.lng]} icon={customIcon}>
@@ -34,7 +50,7 @@ export default function Map({ points }: { points: Point[] }) {
         </Marker>
       ))}
 
-      <Polyline positions={positions} color="blue" />
+      <Polyline positions={positions} color="#2563eb" weight={4} opacity={0.7} />
     </MapContainer>
   );
 }
