@@ -4,7 +4,6 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix para los iconos de Leaflet en Next.js
 const customIcon = new L.Icon({
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
@@ -35,7 +34,6 @@ export default function Map({ points }: { points: Point[] }) {
         </Marker>
       ))}
 
-      {/* Dibuja una línea conectando el orden de los puntos */}
       <Polyline positions={positions} color="blue" />
     </MapContainer>
   );

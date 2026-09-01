@@ -3,6 +3,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import Link from 'next/link';
+import { Button, Spin, Empty } from 'antd';
+import { PlusOutlined, EnvironmentOutlined, ArrowRightOutlined } from '@ant-design/icons';
 
 export default function Home() {
   const queryClient = useQueryClient();
@@ -26,42 +28,51 @@ export default function Home() {
         ]
       });
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['routes'] });
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['routes'] })
   });
 
-  if (isLoading) return <div className="p-10 text-center text-gray-500">Cargando rutas...</div>;
+  if (isLoading) return <div className="min-h-screen flex items-center justify-center"><Spin size="large" /></div>;
 
   return (
-    <main className="max-w-4xl mx-auto p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Rutas de Transporte</h1>
-        <button 
+    <main className="max-w-5xl mx-auto p-8">
+      <div className="flex justify-between items-center mb-10 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Panel de Rutas</h1>
+          <p className="text-slate-500 mt-1">Gestiona los trayectos y asignaciones de la flota.</p>
+        </div>
+        <Button 
+          type="primary" 
+          icon={<PlusOutlined />} 
+          size="large"
+          className="bg-blue-600 hover:bg-blue-700"
           onClick={() => createMockRoute.mutate()}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
+          loading={createMockRoute.isPending}
         >
-          + Crear Ruta de Prueba
-        </button>
+          Crear Ruta de Prueba
+        </Button>
       </div>
 
-      {routes?.length === 0 ? (
-        <p className="text-gray-500 border-2 border-dashed border-gray-300 p-10 text-center rounded-lg">
-          No hay rutas creadas. Usa el botón de arriba para generar una.
-        </p>
+      {!routes || routes.length === 0 ? (
+        <div className="bg-white rounded-2xl p-12 shadow-sm border border-slate-100">
+          <Empty description="No hay rutas configuradas en el sistema" />
+        </div>
       ) : (
-        <div className="grid gap-4">
-          {routes?.map((route: any) => (
-            <div key={route._id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center">
-              <div>
-                <h2 className="text-xl font-semibold text-gray-800">{route.name}</h2>
-                <p className="text-sm text-gray-500">{route.points.length} puntos geográficos</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {routes.map((route: any) => (
+            <div key={route._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-200 transition-all group">
+              <div className="flex items-start justify-between mb-4">
+                <div className="bg-blue-50 p-3 rounded-xl text-blue-600">
+                  <EnvironmentOutlined className="text-xl" />
+                </div>
               </div>
-              <Link 
-                href={`/ruta/${route._id}`}
-                className="text-blue-600 font-medium hover:underline"
-              >
-                Ver Mapa y Duties &rarr;
+              <h2 className="text-xl font-bold text-slate-800 mb-1">{route.name}</h2>
+              <p className="text-sm text-slate-500 mb-6">{route.points.length} puntos geográficos registrados</p>
+              
+              <Link href={`/ruta/${route._id}`}>
+                <Button type="default" className="w-full flex items-center justify-between group-hover:text-blue-600 group-hover:border-blue-400">
+                  <span>Gestionar Duties</span>
+                  <ArrowRightOutlined />
+                </Button>
               </Link>
             </div>
           ))}
