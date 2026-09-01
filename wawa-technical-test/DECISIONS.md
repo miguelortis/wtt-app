@@ -7,3 +7,10 @@ He decidido estructurar el proyecto alojando el backend (NestJS) y el frontend (
 Para la base de datos, he estructurado los esquemas en MongoDB habilitando `versionKey: '__v'` de Mongoose y creando índices compuestos (`unitId`, `startTime`, `endTime`).
 
 **Decisión Arquitectónica:** Dado que MongoDB no soporta *Exclude Constraints* nativos para rangos de tiempo (como PostgreSQL), la responsabilidad de mantener la integridad recae en el backend. El índice compuesto garantiza que las consultas de validación previas a la inserción sean O(log N) y no escaneos completos de colección, preparando el terreno para envolver la operación en una Transacción ACID.
+
+## 3. Resolución de Concurrencia (Transacciones ACID)
+**El problema:** El reto principal consistía en asegurar la integridad de la base de datos cuando múltiples peticiones concurrentes intentan asignar *duties* a una misma unidad en el mismo bloque temporal. 
+
+**La decisión:** En lugar de realizar una verificación lineal (leer, validar, insertar) —la cual es vulnerable a *race conditions*—, encapsulé la validación matemática de los tiempos (`$lt` y `$gt`) y la creación del documento dentro de una misma `Session` de Mongoose ejecutando `startTransaction()`. 
+
+**Impacto:** Esto asegura que la operación sea atómica. Si dos hilos validan la disponibilidad al mismo tiempo, el motor de la base de datos bloqueará o abortará la segunda transacción, protegiendo la regla de negocio.
