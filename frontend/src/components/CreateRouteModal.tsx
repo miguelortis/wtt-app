@@ -109,13 +109,13 @@ export default function CreateRouteModal({ isOpen, onClose }: CreateRouteModalPr
           </div>
         )}
 
-        <label className="block font-semibold mb-2 text-slate-700 flex items-center gap-2">
+        <label className="font-semibold mb-2 text-slate-700 flex items-center gap-2">
           <EnvironmentOutlined className="text-blue-600" /> Puntos Geográficos Registrados ({pointsValue.length})
         </label>
         
         <Form.List name="points">
           {(fields, { add, remove }) => (
-            <div className="space-y-3 max-h-[250px] overflow-y-auto pr-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <div className="space-y-3 max-h-62.5 overflow-y-auto pr-2 bg-slate-50 p-3 rounded-xl border border-slate-200">
               {fields.length === 0 && (
                 <p className="text-center text-slate-400 py-4 text-sm">
                   Aún no hay puntos. Haz clic en el mapa o añade coordenadas manualmente.

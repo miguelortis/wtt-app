@@ -13,7 +13,6 @@ import {
   Button,
   notification,
   Spin,
-  List,
   Tag,
   Popconfirm,
   Listy,
@@ -55,7 +54,7 @@ export default function RouteDetail() {
     queryFn: async () => (await api.get(`/routes/${routeId}`)).data,
   });
 
-  const { data: duties, isLoading: dutiesLoading } = useQuery({
+  const { data: duties } = useQuery({
     queryKey: ["duties", routeId],
     queryFn: async () => (await api.get(`/duties/route/${routeId}`)).data,
   });
