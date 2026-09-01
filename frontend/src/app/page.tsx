@@ -60,14 +60,16 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {routes.map((route: Route) => (
             <div key={route._id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md hover:border-blue-200 transition-all group flex flex-col justify-between">
-              <div>
+              <div className="flex items-start justify-between mb-4 gap-2">
                 <div className="flex items-start justify-between mb-4">
                   <div className="bg-blue-50 p-3 rounded-xl text-blue-600">
                     <EnvironmentOutlined className="text-xl" />
                   </div>
                 </div>
+                <div className="gap-2">
                 <h2 className="text-xl font-bold text-slate-800 mb-1">{route.name}</h2>
-                <p className="text-sm text-slate-500 mb-6">{route.points.length} puntos geográficos registrados</p>
+                <p className="text-sm text-slate-500 mb-1">{route.points.length} puntos geográficos registrados</p>
+                </div>
               </div>
               
               <div className="flex items-center justify-between pt-4 border-t border-slate-100 gap-2">

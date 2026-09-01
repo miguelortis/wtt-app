@@ -1,56 +1,73 @@
 'use client';
 
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
+import { useEffect, useRef } from 'react';
+import type { Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
 
-const customIcon = new L.Icon({
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-
-interface Point {
-  lat: number;
-  lng: number;
-  name?: string;
+interface MapProps {
+  points: { lat: number; lng: number; name?: string }[];
 }
 
-export default function Map({ points }: { points: Point[] }) {
-  if (!points || points.length === 0) {
-    return (
-      <div className="h-100 bg-slate-50 flex items-center justify-center rounded-xl border border-slate-200">
-        <span className="text-slate-400">No hay puntos geográficos registrados</span>
-      </div>
-    );
-  }
+export default function Map({ points }: MapProps) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<LeafletMap | null>(null);
 
-  const center = [points[0].lat, points[0].lng] as [number, number];
-  const positions = points.map(p => [p.lat, p.lng] as [number, number]);
+  useEffect(() => {
+    if (typeof window === 'undefined' || !mapRef.current) return;
 
-  return (
-    // El 'key' sigue siendo importante para forzar la re-renderización de Leaflet si la ruta cambia, 
-    // previniendo el error interno de appendChild de la librería.
-    <MapContainer 
-      key={center.toString()} 
-      center={center} 
-      zoom={14} 
-      style={{ height: '400px', width: '100%', borderRadius: '0.75rem', zIndex: 1 }}
-    >
-      <TileLayer 
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" 
-        attribution='&copy; OpenStreetMap contributors'
-      />
-      
-      {points.map((point, idx) => (
-        <Marker key={idx} position={[point.lat, point.lng]} icon={customIcon}>
-          <Popup>{point.name || `Punto ${idx + 1}`}</Popup>
-        </Marker>
-      ))}
+    import('leaflet').then((L) => {
+      const iconPrototype = L.Icon.Default.prototype as typeof L.Icon.Default.prototype & {
+        _getIconUrl?: string;
+      };
+      delete iconPrototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      });
 
-      <Polyline positions={positions} color="#2563eb" weight={4} opacity={0.7} />
-    </MapContainer>
-  );
+      if (!mapInstanceRef.current && mapRef.current) {
+        const initialLat = points?.[0]?.lat || 10.4806;
+        const initialLng = points?.[0]?.lng || -66.9036;
+
+        mapInstanceRef.current = L.map(mapRef.current).setView([initialLat, initialLng], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(mapInstanceRef.current);
+      }
+
+      const map = mapInstanceRef.current;
+
+      if (!map) return;
+
+      map.eachLayer((layer: unknown) => {
+        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+          map.removeLayer(layer);
+        }
+      });
+
+      if (points && points.length > 0) {
+        const latLngs = points.map((p) => [Number(p.lat), Number(p.lng)] as [number, number]);
+
+        points.forEach((p) => {
+          L.marker([Number(p.lat), Number(p.lng)])
+            .addTo(map)
+            .bindPopup(p.name || 'Punto de ruta');
+        });
+
+        const polyline = L.polyline(latLngs, { color: 'blue', weight: 4 }).addTo(map);
+        map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+      }
+    });
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [points]);
+
+  return <div ref={mapRef} className="w-full h-96 z-0" />;
 }

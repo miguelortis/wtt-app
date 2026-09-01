@@ -16,6 +16,7 @@ import {
   List,
   Tag,
   Popconfirm,
+  Listy,
 } from "antd";
 import {
   ArrowLeftOutlined,
@@ -141,6 +142,32 @@ export default function RouteDetail() {
       <div className="p-10 text-center text-red-500">Ruta no encontrada</div>
     );
 
+  const items: Array<{ id: number; content: React.ReactNode }> = duties.map(
+    (duty: Duty, index: number) => ({
+      id: index,
+      content: (
+        <div className="w-full">
+          <div className="flex justify-between items-center mb-1">
+            <span className="font-semibold text-slate-800">
+              <CarOutlined className="mr-2" />
+              {duty?.unitId}
+            </span>
+            <Tag color="blue">Asignado</Tag>
+          </div>
+          <div className="text-xs text-slate-500 flex flex-col gap-1 mt-2">
+            <span>
+              <strong>Inicio:</strong>{" "}
+              {dayjs(duty?.startTime).format("DD MMM YYYY, HH:mm")}
+            </span>
+            <span>
+              <strong>Fin:</strong>{" "}
+              {dayjs(duty?.endTime).format("DD MMM YYYY, HH:mm")}
+            </span>
+          </div>
+        </div>
+      ),
+    })
+  );
   return (
     <main className="max-w-7xl mx-auto p-4 md:p-8">
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -261,49 +288,11 @@ export default function RouteDetail() {
               <ClockCircleOutlined className="text-blue-600" /> Historial de
               Asignaciones
             </h2>
-
-            <List
-              loading={dutiesLoading}
-              dataSource={duties}
-              locale={{ emptyText: "No hay unidades asignadas aún." }}
-              renderItem={(duty: Duty) => (
-                <List.Item
-                  className="border-b border-slate-100 last:border-0 pb-3 mb-3"
-                  actions={[
-                    <Popconfirm
-                      key="delete"
-                      title="¿Liberar esta unidad?"
-                      description="Se eliminará este duty del historial."
-                      onConfirm={() => deleteDuty.mutate(duty._id)}
-                      okText="Sí, eliminar"
-                      cancelText="Cancelar"
-                      okButtonProps={{ danger: true }}
-                    >
-                      <Button type="text" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>,
-                  ]}
-                >
-                  <div className="w-full">
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="font-semibold text-slate-800">
-                        <CarOutlined className="mr-2" />
-                        {duty.unitId}
-                      </span>
-                      <Tag color="blue">Asignado</Tag>
-                    </div>
-                    <div className="text-xs text-slate-500 flex flex-col gap-1 mt-2">
-                      <span>
-                        <strong>Inicio:</strong>{" "}
-                        {dayjs(duty.startTime).format("DD MMM YYYY, HH:mm")}
-                      </span>
-                      <span>
-                        <strong>Fin:</strong>{" "}
-                        {dayjs(duty.endTime).format("DD MMM YYYY, HH:mm")}
-                      </span>
-                    </div>
-                  </div>
-                </List.Item>
-              )}
+            <Listy
+              items={items}
+              height={400}
+              rowKey="id"
+              itemRender={(item) => item.content}
             />
           </div>
         </div>
